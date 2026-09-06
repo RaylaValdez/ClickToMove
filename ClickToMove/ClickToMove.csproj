@@ -8,11 +8,11 @@
 -->
 <Project Sdk="Dalamud.NET.Sdk/15.0.0">
   <PropertyGroup>
-    <Version>1.0.0.11</Version>
+    <Version>1.0.0.0</Version>
     <Authors>Gerry of Ravine</Authors>
     <CompanyName>Triquetra</CompanyName>
-    <Description>Click to move: Shift-click the world to walk there. Uses vnavmesh when available, straight line fallback otherwise. Movement idea adapted from Jaksuhn ffxiv-bundleoftweaks.</Description>
-    <PackageProjectUrl>https://github.com/anomalyco/PlayerQuests</PackageProjectUrl>
+    <Description>Click where you wanna go! Hold Shift and left-click the world to walk there. Uses vnavmesh pathfinding when available, straight line fallback otherwise.</Description>
+    <PackageProjectUrl>https://github.com/RaylaValdez/ClickToMove</PackageProjectUrl>
     <PackageLicenseExpression>BSD-3-Clause</PackageLicenseExpression>
     <IsPackable>false</IsPackable>
     <Nullable>enable</Nullable>
@@ -21,13 +21,15 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <!--
-    Bump the revision component of Version on every real build,
-    so each build that lands in devPlugins carries a fresh version.
+    Bump the revision component of Version on Debug builds only,
+    so dev builds in devPlugins each carry a fresh version while
+    Release and ExportRelease builds keep a deliberate version
+    for repo publishing.
     Design-time builds (IntelliSense) are skipped on purpose.
     Runs before PrepareForBuild so the new Version flows into
     assembly attributes and the Dalamud manifest for this build.
   -->
-  <Target Name="BumpBuildVersion" BeforeTargets="PrepareForBuild" Condition="'$(DesignTimeBuild)' != 'true' AND '$(BuildingProject)' == 'true'">
+  <Target Name="BumpBuildVersion" BeforeTargets="PrepareForBuild" Condition="'$(DesignTimeBuild)' != 'true' AND '$(BuildingProject)' == 'true' AND '$(Configuration)' == 'Debug'">
     <XmlPeek XmlInputPath="$(MSBuildProjectFullPath)" Query="/Project/PropertyGroup/Version/text()">
       <Output TaskParameter="Result" ItemName="CurrentVersionNode" />
     </XmlPeek>
