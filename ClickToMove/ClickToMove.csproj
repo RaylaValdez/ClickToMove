@@ -1,0 +1,62 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ClickToMove plugin project.
+  Uses Dalamud.NET.Sdk which supplies the target framework,
+  Dalamud assembly references, and the packager.
+  Keep this file small on purpose. Only Version is required.
+  Everything else here overrides the SDK defaults.
+-->
+<Project Sdk="Dalamud.NET.Sdk/15.0.0">
+  <PropertyGroup>
+    <Version>1.0.0.11</Version>
+    <Authors>Gerry of Ravine</Authors>
+    <CompanyName>Triquetra</CompanyName>
+    <Description>Click to move: Shift-click the world to walk there. Uses vnavmesh when available, straight line fallback otherwise. Movement idea adapted from Jaksuhn ffxiv-bundleoftweaks.</Description>
+    <PackageProjectUrl>https://github.com/anomalyco/PlayerQuests</PackageProjectUrl>
+    <PackageLicenseExpression>BSD-3-Clause</PackageLicenseExpression>
+    <IsPackable>false</IsPackable>
+    <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <!--
+    Bump the revision component of Version on every real build,
+    so each build that lands in devPlugins carries a fresh version.
+    Design-time builds (IntelliSense) are skipped on purpose.
+    Runs before PrepareForBuild so the new Version flows into
+    assembly attributes and the Dalamud manifest for this build.
+  -->
+  <Target Name="BumpBuildVersion" BeforeTargets="PrepareForBuild" Condition="'$(DesignTimeBuild)' != 'true' AND '$(BuildingProject)' == 'true'">
+    <XmlPeek XmlInputPath="$(MSBuildProjectFullPath)" Query="/Project/PropertyGroup/Version/text()">
+      <Output TaskParameter="Result" ItemName="CurrentVersionNode" />
+    </XmlPeek>
+    <PropertyGroup>
+      <CurrentFileVersion>@(CurrentVersionNode)</CurrentFileVersion>
+      <VerMajor>$([System.Version]::Parse('$(CurrentFileVersion)').Major)</VerMajor>
+      <VerMinor>$([System.Version]::Parse('$(CurrentFileVersion)').Minor)</VerMinor>
+      <VerBuild>$([System.Version]::Parse('$(CurrentFileVersion)').Build)</VerBuild>
+      <VerRevision>$([System.Version]::Parse('$(CurrentFileVersion)').Revision)</VerRevision>
+      <NextRevision>$([MSBuild]::Add('$(VerRevision)', '1'))</NextRevision>
+      <NextVersion>$(VerMajor).$(VerMinor).$(VerBuild).$(NextRevision)</NextVersion>
+    </PropertyGroup>
+    <XmlPoke XmlInputPath="$(MSBuildProjectFullPath)" Query="/Project/PropertyGroup/Version" Value="$(NextVersion)" />
+    <PropertyGroup>
+      <Version>$(NextVersion)</Version>
+    </PropertyGroup>
+    <Message Importance="high" Text="ClickToMove version bumped: $(CurrentFileVersion) -&gt; $(NextVersion)" />
+  </Target>
+  <!--
+    Every build copies itself into the game's devPlugins folder,
+    so Dalamud picks it up without manual copying.
+    Close the game (or unload the plugin) before rebuilding,
+    or the copy fails because the game locks the DLL.
+  -->
+  <Target Name="CopyToDevPlugins" AfterTargets="Build" DependsOnTargets="DefaultDalamudPackagerDebug;DefaultDalamudPackagerRelease" Condition="'$(DesignTimeBuild)' != 'true' AND '$(BuildingProject)' == 'true'">
+    <PropertyGroup>
+      <DevPluginFolder>$(APPDATA)/XIVLauncher/devPlugins/ClickToMove/</DevPluginFolder>
+    </PropertyGroup>
+    <MakeDir Directories="$(DevPluginFolder)" />
+    <Copy SourceFiles="$(TargetDir)$(TargetName).dll;$(TargetDir)$(TargetName).deps.json;$(TargetDir)$(TargetName).json" DestinationFolder="$(DevPluginFolder)" SkipUnchangedFiles="true" />
+  </Target>
+</Project>

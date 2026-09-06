@@ -1,0 +1,11 @@
+{
+  "Author": "Rayla Valdez",
+  "Name": "ClickToMove",
+  "Punchline": "Shift-click the world to walk there.",
+  "Description": "Click to move for FFXIV. Hold Shift and left-click ground to move there. Uses vnavmesh pathfinding when available, straight line fallback otherwise. Movement idea adapted from Jaksuhn ffxiv-bundleoftweaks (BSD-3-Clause). Requires vnavmesh for pathfinding: https://puni.sh/api/repository/veyn",
+  "ApplicableVersion": "any",
+  "Tags": [
+    "movement",
+    "utility"
+  ]
+}
